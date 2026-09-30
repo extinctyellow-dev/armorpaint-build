@@ -45,12 +45,16 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Generate Visual Studio project
-        shell: bash
+        shell: pwsh
         working-directory: armorpaint/paint
         run: |
-          set -e
-          ../base/make
-          test -f build/ArmorPaint.sln || test -f build/ArmorPaint.vcxproj
+          $ErrorActionPreference = "Stop"
+          & ..\base\make.bat
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          if (-not (Test-Path "build\ArmorPaint.sln") -and -not (Test-Path "build\ArmorPaint.vcxproj")) {
+            throw "ArmorPaint Visual Studio project was not generated."
+          }
 
       - name: Compile Release x64
         shell: pwsh
